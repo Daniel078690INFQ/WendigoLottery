@@ -1,5 +1,6 @@
 package com.example.wendigolottery;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import com.google.gson.annotations.Expose;
@@ -62,6 +63,11 @@ public class Sorteio {
 
     public void setNumerosSorteados(int[] numerosSorteados) {
         this.numerosSorteados = numerosSorteados;
+    }
+
+    public String getDataFormatada () {
+        SimpleDateFormat formatoData = new SimpleDateFormat("dd/MM/yyyy");
+        return formatoData.format(this.dataSorteio);
     }
 
     @Override

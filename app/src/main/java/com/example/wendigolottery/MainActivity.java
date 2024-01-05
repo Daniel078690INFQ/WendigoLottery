@@ -1,9 +1,7 @@
 package com.example.wendigolottery;
 
 import androidx.appcompat.app.AppCompatActivity;
-import com.example.wendigolottery.APIConnection;
-import com.example.wendigolottery.RestService;
-import com.example.wendigolottery.Sorteio;
+import com.google.gson.Gson;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,7 +16,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
-    View rootView; TextView txtAviso; Spinner spinnerTipos;
+    View rootView; Spinner spinnerTipos;
+    TextView tituloSorteio, codigoSorteio, avisoLegal, dataSorteio;
     String[] arrayTiposSorteio = {"Mega-Sena", "Quina", "Lotofacil", "Lotomania", "Timemania", "Dia da Sorte"};
 
     @Override
@@ -27,8 +26,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         rootView = getWindow().getDecorView().getRootView();
 
-        txtAviso = findViewById(R.id.txtAvisoLegal);
-        txtAviso.setText("Sorteio meramente ilustrativo e sem nenhuma ligação com canais oficiais.");
+        tituloSorteio = findViewById(R.id.textTema);
+        codigoSorteio = findViewById(R.id.textCodigo);
+        dataSorteio = findViewById(R.id.textData);
+
+        avisoLegal = findViewById(R.id.txtAvisoLegal);
+        avisoLegal.setText("Sorteio meramente ilustrativo e sem nenhuma ligação com canais oficiais.");
 
         spinnerTipos = findViewById(R.id.spinnerTipoSorteio);
 
@@ -36,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerTipos.setAdapter(adapter);
 
-        // Configurando um listener para capturar a seleção do usuário
         spinnerTipos.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -97,6 +99,10 @@ public class MainActivity extends AppCompatActivity {
 
                         Log.d("RETORNO:", responseData);
 
+                        Gson gson = new Gson();
+                        Sorteio sorteio = gson.fromJson(responseData, Sorteio.class);
+                        montarSorteio(sorteio);
+
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -107,8 +113,14 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-
+                Log.e("ERROR:", "Falha na chamada à API", t);
             }
         });
+    }
+
+    protected void montarSorteio(Sorteio sorteioAtivo) {
+        tituloSorteio.setText(sorteioAtivo.getTipoSorteio());
+        codigoSorteio.setText("Código Nº" + sorteioAtivo.getCodigo().toString());
+        dataSorteio.setText("Realizado em " + sorteioAtivo.getDataFormatada());
     }
 }

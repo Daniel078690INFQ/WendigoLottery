@@ -7,6 +7,6 @@ import retrofit2.http.Path;
 
 public interface RestService {
 
-    @GET("/sorteio/{tipo}")
+    @GET("sorteio/{tipo}")
     Call<ResponseBody> buscarSorteio(@Path("tipo") String tipo);
 }
