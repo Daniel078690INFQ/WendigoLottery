@@ -1,21 +1,25 @@
 package com.example.wendigolottery;
 
 import androidx.appcompat.app.AppCompatActivity;
-
+import com.example.wendigolottery.APIConnection;
+import com.example.wendigolottery.RestService;
+import com.example.wendigolottery.Sorteio;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
-
-import java.lang.reflect.Array;
-import java.util.ArrayList;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
     View rootView; TextView txtAviso; Spinner spinnerTipos;
-    String[] arrayTiposSorteio = {"Megasena", "Quina", "Lotofacil", "Lotomania", "Timemania", "Dia da Sorte"};
+    String[] arrayTiposSorteio = {"Mega-Sena", "Quina", "Lotofacil", "Lotomania", "Timemania", "Dia da Sorte"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 String selectedItem = adapterView.getItemAtPosition(i).toString().replaceAll("[^a-zA-Z]", "").toLowerCase();
                 changeBackgroundBasedOnLottery(selectedItem);
+                buscarSorteio(selectedItem);
             }
 
             @Override
@@ -76,5 +81,34 @@ public class MainActivity extends AppCompatActivity {
         }
 
         rootView.setBackgroundColor(Color.parseColor(color));
+    }
+
+    protected void buscarSorteio(String tipoSorteio) {
+        Log.d("PROCESSO:", "Enviando a solicitação para a API!");
+        RestService restService = APIConnection.createConnectionToAPI();
+        Call<ResponseBody> call = restService.buscarSorteio(tipoSorteio);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                Log.d("PROCESSO:", "Resposta gerada pela API!");
+                if(response.isSuccessful()) {
+                    try {
+                        String responseData = response.body().string();
+
+                        Log.d("RETORNO:", responseData);
+
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                Log.e("ERROR:", "Resposta não recebida!");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+            }
+        });
     }
 }
