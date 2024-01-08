@@ -1,6 +1,10 @@
 package com.example.wendigolottery;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.gson.Gson;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -16,7 +20,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
-    View rootView; Spinner spinnerTipos;
+    View rootView; Spinner spinnerTipos; RecyclerView recyclerViewNumerosSorteados;
     TextView tituloSorteio, codigoSorteio, avisoLegal, dataSorteio;
     String[] arrayTiposSorteio = {"Mega-Sena", "Quina", "Lotofacil", "Lotomania", "Timemania", "Dia da Sorte"};
 
@@ -25,6 +29,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         rootView = getWindow().getDecorView().getRootView();
+
+        recyclerViewNumerosSorteados = findViewById(R.id.recyclerNumerosSorteados);
+        GridLayoutManager layoutManager = new GridLayoutManager(this, 3);
+        recyclerViewNumerosSorteados.setLayoutManager(layoutManager);
 
         tituloSorteio = findViewById(R.id.textTema);
         codigoSorteio = findViewById(R.id.textCodigo);
@@ -42,14 +50,13 @@ public class MainActivity extends AppCompatActivity {
         spinnerTipos.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                String selectedItem = adapterView.getItemAtPosition(i).toString().replaceAll("[^a-zA-Z]", "").toLowerCase();
-                changeBackgroundBasedOnLottery(selectedItem);
-                buscarSorteio(selectedItem);
+                String opcaoSelecionada = adapterView.getItemAtPosition(i).toString().replaceAll("[^a-zA-Z]", "").toLowerCase();
+                buscarSorteio(opcaoSelecionada);
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                changeBackgroundBasedOnLottery("nenhum");
+                // Não fará nada porque sempre terá
             }
         });
 
@@ -78,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
                 color = "#bfaf83";
                 break;
             default:
-                color = "#ffffff";
+                color = "#bfe4ec";
                 break;
         }
 
@@ -122,5 +129,8 @@ public class MainActivity extends AppCompatActivity {
         tituloSorteio.setText(sorteioAtivo.getTipoSorteio());
         codigoSorteio.setText("Código Nº" + sorteioAtivo.getCodigo().toString());
         dataSorteio.setText("Realizado em " + sorteioAtivo.getDataFormatada());
+        changeBackgroundBasedOnLottery(sorteioAtivo.getTipoSorteio().substring(8));
+        NumerosSorteadosAdapter adapter = new NumerosSorteadosAdapter(sorteioAtivo.getNumerosSorteados());
+        recyclerViewNumerosSorteados.setAdapter(adapter);
     }
 }
